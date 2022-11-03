@@ -1,27 +1,6 @@
 import torch
 import torch.nn as nn
 
-class RNNModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
-        super(RNNModel, self).__init__()
-        
-        self.hidden_dim = hidden_dim
-        
-        self.layer_dim = layer_dim
-        
-        self.rnn = nn.RNN(input_dim, hidden_dim, layer_dim, batch_first=True, nonlinearity='relu')
-        
-        self.fc = nn.Linear(hidden_dim, output_dim)
-    
-    def forward(self, x):
-        
-        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
-
-        out, hn = self.rnn(x, h0)
-        out = self.fc(out[:, -1, :]) 
-        return out
-
-
 class LSTMModel(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, num_classes):
         super(LSTMModel, self).__init__()
@@ -44,48 +23,51 @@ class LSTMModel(nn.Module):
         return out
 
 
+class RNNModel(nn.Module):
+    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
+        super(RNNModel, self).__init__()
+        
+        self.hidden_dim = hidden_dim
+        
+        self.layer_dim = layer_dim
+        
+        self.rnn = nn.RNN(input_dim, hidden_dim, layer_dim, batch_first=True, nonlinearity='relu')
+        
+        self.fc = nn.Linear(hidden_dim, output_dim)
+    
+    def forward(self, x):
+        
+        h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim).requires_grad_()
+
+        out, _ = self.rnn(x, h0)
+        out = self.fc(out[:, -1, :]) 
+        return out
+
 
 class CNNModel(nn.Module):
     def __init__(self, output):
         super().__init__()
 
         self.features = nn.Sequential(
-            nn.Conv1d(in_channels=2, out_channels=64, kernel_size=2, stride=1, padding=1, dilation=1),
+            nn.Conv1d(in_channels=2, out_channels=25, kernel_size=1),
             nn.ReLU(),
-            nn.BatchNorm1d(64),
-
-            nn.Conv1d(in_channels=64, out_channels=64, kernel_size=2, stride=1, padding=1, dilation=1),
-            nn.ReLU(),
-            nn.BatchNorm1d(64),
-
-            nn.Conv1d(in_channels=64, out_channels=64, kernel_size=2, stride=1, padding=1, dilation=4),
-            nn.ReLU(),
-            nn.BatchNorm1d(64),
-
-            nn.Conv1d(in_channels=64, out_channels=64, kernel_size=2, stride=1, padding=1, dilation=8),
-            nn.ReLU(),
-            nn.BatchNorm1d(64),
-
-            # nn.Conv1d(in_channels=64, out_channels=64, kernel_size=2, stride=1, padding=1, dilation=4),
-            # nn.ReLU(),
+            nn.BatchNorm1d(25)
         )
 
         self.classifier = nn.Sequential(
-            nn.Linear(2498560, 512),
+            nn.Dropout(p=0.5),
+            nn.Linear(7500, 512),
             nn.ReLU(),
-
+            
+            nn.Dropout(p=0.5),            
             nn.Linear(512, 256),
             nn.ReLU(),
-
+            
             nn.Linear(256, output),
-            nn.Softmax()
         )
         
     def forward(self, x):
         x = self.features(x)
-        h = torch.max(x, 1)
-        print(h.shape)
-        h = torch.flatten(h)
-        print(h.shape)
+        h = x.view(x.shape[0], -1)
         x = self.classifier(h)
-        return x, h
+        return x

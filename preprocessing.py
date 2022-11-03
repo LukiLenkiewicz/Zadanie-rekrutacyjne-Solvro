@@ -4,6 +4,7 @@ import torch
 
 def rotate_data(X, thetas=[np.pi/2, np.pi, 3*np.pi/2]):
     X_rotated = []
+    X_rotated.append(X)
     for theta in thetas:
         R = np.array([
             [np.cos(theta), np.sin(theta)],
@@ -19,7 +20,20 @@ def to_torch(X_train, X_val, y_train, y_val):
            torch.from_numpy(y_train).to(torch.float32), torch.from_numpy(y_val).to(torch.float32)
 
 
+def normalize(X):
+    for i in range(len(X)):
+        max_vals = np.max(X[i], axis=0)
+        min_vals = np.min(X[i], axis=0)
+        X[i] = (X[i] - min_vals)/(max_vals - min_vals)
+    
+    return X
+
+
 def prepare_data(X_train, X_val, y_train, y_val, batch_size=128, cnn=False):
+
+    X_train = normalize(X_train)
+    X_val = normalize(X_val)
+
     X_train, X_val, y_train, y_val = to_torch(X_train, X_val, y_train, y_val)
 
     X_train = X_train.split(batch_size)
