@@ -36,11 +36,17 @@ def prepare_data(X_train, X_val, y_train, y_val, batch_size=128, cnn=False):
 
     X_train, X_val, y_train, y_val = to_torch(X_train, X_val, y_train, y_val)
 
-    X_train = X_train.split(batch_size)
-    y_train = y_train.split(batch_size)
+    if torch.cuda.is_available():
+        X_train = X_train.cuda()
+        X_val = X_val.cuda()
+        y_train = y_train.cuda()
+        y_val = y_val.cuda()
 
     if cnn:
         X_train = X_train.transpose(1, 2)
         X_val = X_val.transpose(1, 2)
+
+    X_train = X_train.split(batch_size)
+    y_train = y_train.split(batch_size)
     
     return X_train, X_val, y_train, y_val

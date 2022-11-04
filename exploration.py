@@ -11,12 +11,12 @@ def calculate_distance(arr):
     return distances
 
 
-def plot_samples(samples_per_class, title, figure_size=(20, 15), plot_type="plot"):
-    num_of_samples_per_class = len(samples_per_class[0])
+def plot_samples(samples, title, figure_size=(20, 15), plot_type="plot"):
+    num_of_samples_per_class = len(samples[0])
     fig, axis = plt.subplots(NUM_OF_CLASSES, num_of_samples_per_class, figsize=figure_size)
     fig.suptitle(title)
 
-    for i, class_ in enumerate(samples_per_class):
+    for i, class_ in enumerate(samples):
         for j, sample in enumerate(class_):
             if plot_type == "plot":
                 axis[i, j].plot(sample[:, 0], sample[:, 1])
