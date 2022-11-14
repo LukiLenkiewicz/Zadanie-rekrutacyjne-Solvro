@@ -2,17 +2,17 @@ import numpy as np
 import torch
 
 
-def rotate_data(X, thetas=[np.pi/2, np.pi, 3*np.pi/2]):
+def add_rotated_samples(X, y, thetas):
     X_rotated = []
     X_rotated.append(X)
     for theta in thetas:
-        R = np.array([
+        ROTATION_MATRIX = np.array([
             [np.cos(theta), np.sin(theta)],
             [-np.sin(theta), np.cos(theta)]
         ])
-        X_rotated.append(X@R)
+        X_rotated.append(X@ROTATION_MATRIX)
 
-    return X_rotated
+    return np.concatenate(X_rotated), np.concatenate([y for _ in range(len(X_rotated))])
 
 
 def to_torch(X_train, X_val, y_train, y_val):
@@ -26,7 +26,9 @@ def normalize(X):
     return (X - min_vals)/(max_vals - min_vals)
 
 
-def prepare_data(X_train, X_val, y_train, y_val, batch_size=128, cnn=False):
+def prepare_data(X_train, X_val, y_train, y_val, angles=[np.pi], batch_size=128, cnn=False):
+
+    X_train, y_train = add_rotated_samples(X_train, y_train, angles)
 
     X_train = normalize(X_train)
     X_val = normalize(X_val)

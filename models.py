@@ -50,8 +50,8 @@ class CNNModel(nn.Module):
 
         self.features = nn.Sequential(
             nn.Conv1d(in_channels=2, out_channels=25, kernel_size=1),
-            nn.ReLU(),
-            nn.BatchNorm1d(25)
+            nn.BatchNorm1d(25),
+            nn.ReLU()
         )
 
         self.classifier = nn.Sequential(
