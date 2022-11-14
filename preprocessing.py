@@ -21,12 +21,9 @@ def to_torch(X_train, X_val, y_train, y_val):
 
 
 def normalize(X):
-    for i in range(len(X)):
-        max_vals = np.max(X[i], axis=0)
-        min_vals = np.min(X[i], axis=0)
-        X[i] = (X[i] - min_vals)/(max_vals - min_vals)
-    
-    return X
+    min_vals = np.min(X, axis=1).reshape(X.shape[0], 1, X.shape[2])
+    max_vals = np.max(X, axis=1).reshape(X.shape[0], 1, X.shape[2])
+    return (X - min_vals)/(max_vals - min_vals)
 
 
 def prepare_data(X_train, X_val, y_train, y_val, batch_size=128, cnn=False):
